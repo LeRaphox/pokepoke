@@ -40,7 +40,7 @@ public class VueDuJeu extends BorderPane {
 
     private IJeu jeu;
 
-    // FXML existants
+
     @FXML private Label instructionLabel;
     @FXML private Button boutonPasser;
     @FXML private ImageView grandeCarteActiveView;
@@ -70,8 +70,6 @@ public class VueDuJeu extends BorderPane {
     @FXML private Label nbCartesDefausseJoueurActifLabel;
     @FXML private Label nbRecompensesJoueurActifLabel;
 
-    @FXML private HBox choixComplementairesHBox; // Added for choices
-
     private VueJoueurActif vueJoueurActif;
     private String idPokemonActifCourant_PourGrandeCarte = null;
     private boolean estEnModeAttachementEnergie_Global = false;
@@ -86,7 +84,6 @@ public class VueDuJeu extends BorderPane {
 
     private ObjectProperty<IJoueur> adversaireProperty = new SimpleObjectProperty<>(null);
 
-    // Champs pour la limitation d'attaque
     private int attaquesEffectueesCeTour = 0;
     private boolean attaquePermise = true;
 
@@ -312,19 +309,13 @@ public class VueDuJeu extends BorderPane {
                         this.jeu.uneAttaqueAEteChoisie(nomAttaque);
                         this.attaquesEffectueesCeTour++;
                         this.attaquePermise = false;
-                        // Rafraîchir l'affichage des attaques du joueur actif (pour désactiver les boutons)
                         afficherAttaquesGenerique(pokemonActifObserveCourant, attaquesDisponiblesVBoxJeu, true);
-                        // Rafraîchir l'affichage des attaques de l'adversaire (au cas où)
                         IJoueur adv = adversaireProperty.get();
                         if (adv != null) {
                             afficherAttaquesGenerique(adv.pokemonActifProperty().get(), attaquesAdversaireVBox, false);
                         }
                     } else {
-                        System.out.println("[VueDuJeu] Attaque non permise (déjà effectuée ou autre condition).");
-                        // Optionnel: afficher une alerte ou un message à l'utilisateur
-                        // Par exemple, décommenter la ligne suivante pour un message simple (attention aux instructions du jeu)
-                        // if(instructionLabel.textProperty().isBound()) instructionLabel.textProperty().unbind();
-                        // instructionLabel.setText("Une seule attaque par tour est permise.");
+                        System.out.println("Attaque non permise");
                     }
                 });
                 if (!this.attaquePermise) {
@@ -342,7 +333,6 @@ public class VueDuJeu extends BorderPane {
     private void appliquerStyleGrandeCarteActive() {
         if (grandeCarteActiveView == null) return;
         String styleFinal = "";
-        // Logique existante pour les styles d'évolution et d'attachement d'énergie
         if (modeSelectionBasePourEvolution && carteEvolutionSelectionnee != null && idPokemonActifCourant_PourGrandeCarte != null && jeu.joueurActifProperty().get() != null) {
             fr.umontpellier.iut.ptcgJavaFX.mecanique.Joueur joueurMecanique = (fr.umontpellier.iut.ptcgJavaFX.mecanique.Joueur) jeu.joueurActifProperty().get();
             if (joueurMecanique != null && carteEvolutionSelectionnee != null) {
@@ -354,9 +344,6 @@ public class VueDuJeu extends BorderPane {
         } else if (estEnModeAttachementEnergie_Global && idPokemonActifCourant_PourGrandeCarte != null) {
             styleFinal = "-fx-effect: dropshadow(gaussian, gold, 15, 0.7, 0.0, 0.0); -fx-border-color: gold; -fx-border-width: 3;";
         }
-
-        // Ajout du style KO si nécessaire
-        // Vérifier pokemonActifObserveCourant avant d'accéder à ses propriétés
         if (pokemonActifObserveCourant != null && pokemonActifObserveCourant.pointsDeVieProperty().get() <= 0) {
             if (!styleFinal.isEmpty() && !styleFinal.endsWith(";") && !styleFinal.endsWith(" ")) {
                 styleFinal += ";";
@@ -381,7 +368,7 @@ public class VueDuJeu extends BorderPane {
             boolean previousModeAttachementEnergie = estEnModeAttachementEnergie_Global;
             boolean previousAllowChoiceForOpponent = this.permettreChoixRemplacantPourAdversaireParJoueurActif;
 
-            this.permettreChoixRemplacantPourAdversaireParJoueurActif = false; // Reset by default
+            this.permettreChoixRemplacantPourAdversaireParJoueurActif = false;
             modePaiementCoutRetraiteActif = false;
             modeSelectionRemplacantApresRetraiteActif = false;
             estEnModeAttachementEnergie_Global = false;
@@ -417,24 +404,18 @@ public class VueDuJeu extends BorderPane {
                 System.out.println("[VueDuJeu LOG] instructionListener - 'choisissez...actif': JA=" + (joueurActifAuMomentInstruction != null ? joueurActifAuMomentInstruction.getNom() : "null") +
                         ", AdvPKMActifNull=" + advActifIsNull +
                         ", JAPKMActifNull=" + joueurActifPKMIsNull);
-                // START MODIFICATION
                 IJoueur joueurCourant = jeu.joueurActifProperty().get();
                 IJoueur adversaire = (joueurCourant != null) ? joueurCourant.getAdversaire() : null;
 
-                // Condition pour déterminer si l'adversaire doit choisir
                 boolean adversaireDoitChoisir = adversaire != null && adversaire.pokemonActifProperty().get() == null && joueurCourant != null && joueurCourant.pokemonActifProperty().get() != null;
-                // Condition pour déterminer si le joueur courant doit choisir
                 boolean joueurCourantDoitChoisir = joueurCourant != null && joueurCourant.pokemonActifProperty().get() == null;
 
-                // System.out.println("[VueDuJeu LOG] instructionListener - 'choisissez...actif': adversaireDoitChoisir = " + adversaireDoitChoisir + ", joueurCourantDoitChoisir = " + joueurCourantDoitChoisir);
-                // Commenting out the more granular logs from the previous plan, keeping the consolidated one above.
 
                 if (adversaireDoitChoisir) {
                     System.out.println("[VueDuJeu] L'adversaire doit choisir un nouveau Pokémon actif.");
                     if (instructionLabel.textProperty().isBound()) {
                         instructionLabel.textProperty().unbind();
                     }
-                    // instructionLabel.setText("L'adversaire doit choisir un nouveau Pokémon actif."); // Original
                     instructionLabel.setText("L'adversaire doit choisir. Cliquez sur un Pokémon de son banc."); // Updated
                     this.permettreChoixRemplacantPourAdversaireParJoueurActif = true;
                     // System.out.println("[VueDuJeu LOG] instructionListener - 'choisissez...actif': Tentative de MAJ modeSelectionRemplacantApresRetraiteActif. Sera: " + false);
@@ -530,7 +511,6 @@ public class VueDuJeu extends BorderPane {
                 mettreAJourZoneAdversaire();
             }
 
-            mettreAJourChoixComplementaires(); // Call when instruction changes
             mettreAJourGrandeCarteActive();
         });
 
@@ -606,14 +586,10 @@ public class VueDuJeu extends BorderPane {
                 if (nbCartesPiocheJoueurActifLabel != null) { if(nbCartesPiocheJoueurActifLabel.textProperty().isBound()) nbCartesPiocheJoueurActifLabel.textProperty().unbind(); nbCartesPiocheJoueurActifLabel.setText("Pioche: --");}
                 if (nbCartesDefausseJoueurActifLabel != null) { if(nbCartesDefausseJoueurActifLabel.textProperty().isBound()) nbCartesDefausseJoueurActifLabel.textProperty().unbind(); nbCartesDefausseJoueurActifLabel.setText("Défausse: --");}
                 if (nbRecompensesJoueurActifLabel != null) { if(nbRecompensesJoueurActifLabel.textProperty().isBound()) nbRecompensesJoueurActifLabel.textProperty().unbind(); nbRecompensesJoueurActifLabel.setText("Récompenses: -");}
-                if (choixComplementairesHBox != null) choixComplementairesHBox.getChildren().clear(); // Clear choices if no active player
             }
             // mettreAJourGrandeCarteActive() est appelé plus bas, ce qui rafraîchira les boutons d'attaque.
             mettreAJourGrandeCarteActive();
             mettreAJourZoneAdversaire();
-            if (newJ != null) { // Only update choices if there is an active player
-                mettreAJourChoixComplementaires();
-            }
         });
 
         IJoueur premierJoueurActif = this.jeu.joueurActifProperty().get();
@@ -659,7 +635,6 @@ public class VueDuJeu extends BorderPane {
 
         mettreAJourGrandeCarteActive();
         mettreAJourZoneAdversaire();
-        mettreAJourChoixComplementaires(); // Initial call
 
         if (grandeCarteActiveView != null) {
             grandeCarteActiveView.setOnMouseClicked(event -> {
@@ -1044,36 +1019,5 @@ public class VueDuJeu extends BorderPane {
             nbRecompensesAdversaireLabel.textProperty().bind(recompensesSizeBindingAdv);
         }
     }
-
-    private void mettreAJourChoixComplementaires() {
-        if (choixComplementairesHBox == null) {
-            // This can happen if FXML loading hasn't completed or if the ID is wrong.
-            // System.err.println("[VueDuJeu] choixComplementairesHBox is null. Cannot update choices.");
-            return;
-        }
-
-        choixComplementairesHBox.getChildren().clear();
-        IJoueur joueurCourant = this.jeu.joueurActifProperty().get();
-
-        if (joueurCourant != null) {
-            ObservableList<? extends ICarte> choix = joueurCourant.getChoixComplementaires();
-            if (choix != null && !choix.isEmpty()) {
-                for (ICarte carteChoix : choix) {
-                    Button boutonChoix = new Button(carteChoix.getNom());
-                    boutonChoix.setOnAction(event -> {
-                        this.jeu.uneCarteComplementaireAEteChoisie(carteChoix.getId());
-                        // After a choice is made, refresh choices as the game state might have changed
-                        // This could lead to new choices or clear existing ones.
-                        // The instruction listener might also handle this if the instruction text changes.
-                        // For now, let's explicitly call it.
-                        mettreAJourChoixComplementaires();
-                    });
-                    choixComplementairesHBox.getChildren().add(boutonChoix);
-                }
-            }
-        }
-        // Optionally, manage visibility:
-        // choixComplementairesHBox.setVisible(!choixComplementairesHBox.getChildren().isEmpty());
-        // choixComplementairesHBox.setManaged(!choixComplementairesHBox.getChildren().isEmpty());
-    }
 }
+

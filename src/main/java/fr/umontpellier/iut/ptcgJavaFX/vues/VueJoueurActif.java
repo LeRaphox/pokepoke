@@ -334,6 +334,7 @@ public class VueJoueurActif extends VBox {
                     final HBox energiesPokemonBancHBox = new HBox(3);
                     energiesPokemonBancHBox.setAlignment(javafx.geometry.Pos.CENTER);
 
+                    // MODIFIED: stylePourCartePane initialized here
                     String stylePourCartePane = "";
                     EventHandler<MouseEvent> clicHandlerPourCartePane; // Utiliser javafx.event.EventHandler
 
@@ -348,22 +349,26 @@ public class VueJoueurActif extends VBox {
                             List<String> ciblesValides = vueDuJeu.getCarteEvolutionSelectionnee().getChoixPossibles(joueurMecanique);
                             if (ciblesValides.contains(idCartePokemonFinal)) {
                                 estCibleEvolutionValide = true;
-                                stylePourCartePane = "-fx-effect: dropshadow(gaussian, lawngreen, 20, 0.8, 0.0, 0.0); -fx-border-color: lawngreen; -fx-border-width: 4;";
+                                // stylePourCartePane is set in the if block below
                             }
                         }
                     }
 
                     if (estCibleEvolutionValide) {
+                        stylePourCartePane = "-fx-effect: dropshadow(gaussian, lawngreen, 20, 0.8, 0.0, 0.0); -fx-border-color: lawngreen; -fx-border-width: 4;";
                         clicHandlerPourCartePane = event -> {
                             System.out.println("[VueJoueurActif] Pokemon du banc (ID: " + idCartePokemonFinal + ") choisi comme base pour evolution.");
                             vueDuJeu.pokemonDeBaseChoisiPourEvolution(idCartePokemonFinal);
                         };
                     } else if (vueDuJeu != null && vueDuJeu.isModeSelectionRemplacantApresRetraiteActif()) {
+                        // Original logic for replacement selection
                         System.out.println("[VueJoueurActif LOG] placerBanc() loop for " + pokemonNomForLog + ": ATTACHING Remplacant click handler.");
                         clicHandlerPourCartePane = event -> {
                             System.out.println("[VueJoueurActif LOG] Remplacant Handler CLICKED for " + pokemonNomForLog + " on bench of " + this.joueurActif.get().getNom() + ". Mode active = " + vueDuJeu.isModeSelectionRemplacantApresRetraiteActif());
                             vueDuJeu.pokemonDuBancChoisiPourRemplacer(idCartePokemonFinal);
                         };
+                        // Optionally, add a style for this mode if it was intended:
+                        // stylePourCartePane = "-fx-border-color: orange; -fx-border-width: 3;"; // Example
                     } else if (enModeSelectionCibleEnergie && idsCartesChoisissables.contains(idCartePokemonFinal)) {
                         stylePourCartePane = "-fx-effect: dropshadow(gaussian, gold, 15, 0.7, 0.0, 0.0); -fx-border-color: gold; -fx-border-width: 3;";
                         clicHandlerPourCartePane = event -> {
@@ -372,26 +377,44 @@ public class VueJoueurActif extends VBox {
                             if (currentPokemonFinal != null && currentPokemonFinal.energieProperty() != null) {
                                 peuplerConteneurEnergies(currentPokemonFinal, energiesPokemonBancHBox);
                             } else {
-                                placerBanc();
+                                placerBanc(); // Refresh if needed
                             }
                         };
                     } else {
+                        // This is the default case for talent activation
                         clicHandlerPourCartePane = event -> {
-                            if (vueDuJeu != null && vueDuJeu.isModeSelectionBasePourEvolution()){
-                                System.out.println("[VueJoueurActif] Clic sur Pokemon du banc (ID: " + idCartePokemonFinal + ") en mode evolution, mais NON VALIDE.");
-                            } else {
-                                System.out.println("Clic sur Pokémon du banc: " + cartePokemonInterface.getNom() + " à l'index " + indexPokemonFinal + " (aucun mode special actif pour ce pokemon).");
+                            if (currentPokemonFinal.pointsDeVieProperty().get() <= 0) {
+                                System.out.println("[VueJoueurActif] Bench Pokemon " + cartePokemonInterface.getNom() + " is KO'd. Talent cannot be activated by click.");
+                                return;
                             }
+                            System.out.println("[VueJoueurActif] Bench Pokemon " + cartePokemonInterface.getNom() + " (ID: " + idCartePokemonFinal + ") clicked, attempting talent activation via uneCarteDeLaMainAEteChoisie.");
+                            this.jeu.uneCarteDeLaMainAEteChoisie(idCartePokemonFinal);
                         };
-                        // Appliquer l'effet de survol seulement si aucun autre style de mode n'est actif
-                        if (stylePourCartePane.isEmpty()) {
-                            cartePane.setOnMouseEntered(event -> cartePane.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0.4, 0.0, 0.0);"));
-                            cartePane.setOnMouseExited(event -> cartePane.setStyle(""));
+
+                        // Add hover effect for non-KO'd Pokemon in this default case
+                        if (currentPokemonFinal.pointsDeVieProperty().get() > 0) {
+                            // stylePourCartePane should be empty here if we are in this default else block
+                            cartePane.setOnMouseEntered(e -> {
+                                String currentCardPaneStyle = cartePane.getStyle();
+                                if (currentCardPaneStyle == null || currentCardPaneStyle.isEmpty()) {
+                                    cartePane.setStyle("-fx-effect: dropshadow(gaussian, cornflowerblue, 8, 0.4, 0.0, 0.0);");
+                                }
+                            });
+                            cartePane.setOnMouseExited(e -> {
+                                String currentCardPaneStyle = cartePane.getStyle();
+                                if (currentCardPaneStyle != null && currentCardPaneStyle.contains("cornflowerblue")) {
+                                    cartePane.setStyle("");
+                                }
+                            });
+                        } else {
+                            // Pokemon is KO'd, ensure no hover effects
+                            cartePane.setOnMouseEntered(null);
+                            cartePane.setOnMouseExited(null);
                         }
                     }
 
-                    cartePane.setStyle(stylePourCartePane);
-                    cartePane.setOnMouseClicked(clicHandlerPourCartePane);
+                    cartePane.setStyle(stylePourCartePane); // This line should be AFTER the if/else if/else block
+                    cartePane.setOnMouseClicked(clicHandlerPourCartePane); // This line should be AFTER the if/else if/else block
 
                     pokemonAvecEnergiesContainer.getChildren().add(energiesPokemonBancHBox);
                     peuplerConteneurEnergies(currentPokemonFinal, energiesPokemonBancHBox);
