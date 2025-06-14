@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    fichier fxml principal pour la vue du jeu.
+    auteur: [votre nom ou pseudo]
+    date: [date de creation/modification]
+    description: definit la structure de l'interface utilisateur pour le jeu de cartes pokemon.
+                 organise en plusieurs zones : informations generales (top), zone de jeu principale (center)
+                 pour l'adversaire et le joueur actif, et la main/banc du joueur actif avec actions (bottom).
+-->
+
+<fx:root type="javafx.scene.layout.BorderPane" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <!-- label pour les instructions generales du jeu et messages a l'utilisateur -->
+        <Label fx:id="instructionLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Instruction initiale" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets bottom="10" />
+            </BorderPane.margin>
+        </Label>
+    </top>
+    <center>
+        <!-- vbox principale pour organiser verticalement les zones de jeu : adversaire en haut, joueur actif en bas -->
+        <VBox fx:id="zoneDeJeuPrincipaleVBox" alignment="TOP_CENTER" spacing="15" style="-fx-background-color: #f0f0f0;">
+            <padding>
+                <Insets top="5" bottom="5" left="10" right="10" />
+            </padding>
+            <children>
+                <!-- zone de l'adversaire : affiche les informations principales de l'adversaire -->
+                <VBox alignment="CENTER" spacing="5" style="-fx-background-color: #e0e0e0; -fx-padding: 8px; -fx-border-color: lightgray; -fx-border-width: 1px; -fx-border-radius: 5px;">
+                    <children>
+                        <!-- nom du joueur adverse -->
+                        <Label fx:id="nomAdversaireLabel" text="Adversaire: ---" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                        <!-- conteneur horizontal pour le pokemon actif, le banc et les infos cartes de l'adversaire -->
+                        <HBox fx:id="zoneInfosActivesAdversaireHBox" alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <!-- pokemon actif et pv de l'adversaire -->
+                                <VBox fx:id="adversairePokemonActifEtInfosVBox" alignment="CENTER" spacing="2" minWidth="100">
+                                    <children>
+                                        <Label fx:id="pvPokemonActifAdversaireLabel" text="PV: --/--" style="-fx-font-size: 11px; -fx-font-weight: bold;" />
+                                        <ImageView fx:id="pokemonActifAdversaireView" fitHeight="120" fitWidth="85" preserveRatio="true" />
+                                        <!-- energies du pokemon actif de l'adversaire (affichees sous sa carte) -->
+                                        <HBox fx:id="energiesPokemonActifAdversaireHBox" alignment="CENTER" spacing="2" minHeight="25" />
+                                    </children>
+                                </VBox>
+                                <!-- banc de l'adversaire : les cartes pokemon seront ajoutees dynamiquement ici -->
+                                <HBox fx:id="bancAdversaireHBox" alignment="CENTER_LEFT" spacing="3" minHeight="70" prefHeight="70" style="-fx-border-color: #add8e6; -fx-border-width: 1; -fx-padding: 3; -fx-background-color: #f0f8ff;">
+                                    <!-- les imageview des pokemons du banc adverse (fitheight="60") seront ajoutees ici par le code java -->
+                                </HBox>
+                                <!-- infos sur les cartes de l'adversaire (main, pioche, defausse, recompenses) -->
+                                <VBox fx:id="infosCartesAdversaireVBox" alignment="CENTER_LEFT" spacing="3" style="-fx-padding: 5;" minWidth="120">
+                                    <children>
+                                        <Label fx:id="nbCartesMainAdversaireLabel" text="Main: -" style="-fx-font-size: 12px;" />
+                                        <Label fx:id="nbCartesPiocheAdversaireLabel" text="Pioche: --" style="-fx-font-size: 12px;" />
+                                        <Label fx:id="nbCartesDefausseAdversaireLabel" text="Défausse: --" style="-fx-font-size: 12px;" />
+                                        <Label fx:id="nbRecompensesAdversaireLabel" text="Récompenses: -" style="-fx-font-size: 12px;" />
+                                    </children>
+                                </VBox>
+                                <!-- actions de l'adversaire (informatif, pas de vrais boutons pour le joueur actif) et attaques -->
+                                <VBox fx:id="actionsAdversaireVBox" alignment="TOP_CENTER" spacing="5" minWidth="150">
+                                    <children>
+                                        <Button text="Retraite" style="-fx-font-size: 12px; -fx-opacity: 0.7;" disable="true"/>
+                                        <Button text="Talent" style="-fx-font-size: 12px; -fx-opacity: 0.7;" disable="true"/>
+                                        <Label text="Attaques:" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 5 0 2 0;"/>
+                                        <VBox fx:id="attaquesAdversaireVBox" spacing="2" minHeight="50" alignment="TOP_LEFT"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <!-- Insert HBox for choices HERE -->
+                <HBox fx:id="choixComplementairesHBox" alignment="CENTER" spacing="5" style="-fx-padding: 5px;">
+                    <VBox.margin>
+                        <Insets bottom="10" />
+                    </VBox.margin>
+                    <!-- Buttons for choices will be added here by VueDuJeu.java -->
+                </HBox>
+
+                <!-- zone du joueur actif -->
+                <VBox alignment="CENTER" spacing="5" style="-fx-background-color: #d3d3d3; -fx-padding: 8px; -fx-border-color: gray; -fx-border-width: 1px; -fx-border-radius: 5px;">
+                    <children>
+                        <Label text="Joueur Actif" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                        <!-- hbox pour les actions, le pokemon actif, et les attaques du joueur actif -->
+                        <HBox fx:id="zoneJoueurActifCentreHBox" alignment="CENTER" spacing="10">
+                            <children>
+                                <!-- vbox pour les boutons d'action principaux du joueur (retraite, talent) -->
+                                <VBox spacing="5" alignment="TOP_CENTER" minWidth="130"> <!-- largeur minimale pour que les textes ne soient pas coupes -->
+                                    <children>
+                                        <!-- bouton pour echanger le pokemon actif avec un pokemon du banc -->
+                                        <Button fx:id="boutonEchangerPokemon" text="Echanger Pokemon" onAction="#echangerPokemon" style="-fx-font-size: 14px;" maxWidth="Infinity">
+                                            <VBox.margin>
+                                                <Insets bottom="5" />
+                                            </VBox.margin>
+                                        </Button>
+                                        <Button fx:id="boutonUtiliserTalent" text="Utiliser Talent" onAction="#actionUtiliserTalent" style="-fx-font-size: 14px;" maxWidth="Infinity"/>
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets right="10" />
+                                    </HBox.margin>
+                                </VBox>
+
+                                <!-- vbox pour la carte du pokemon actif du joueur, ses pv et ses energies -->
+                                <VBox fx:id="zoneCarteEtEnergiesVBox" alignment="CENTER" spacing="5">
+                                    <children>
+                                        <Label fx:id="pvPokemonActifLabel" text="PV: --/--" style="-fx-font-size: 14px; -fx-font-weight: bold;">
+                                            <VBox.margin>
+                                                <Insets bottom="2" />
+                                            </VBox.margin>
+                                        </Label>
+                                        <ImageView fx:id="grandeCarteActiveView" fitHeight="280" fitWidth="250" preserveRatio="true" />
+                                        <HBox fx:id="energiesPokemonActifHBoxJeu" alignment="CENTER" spacing="3" minHeight="30">
+                                            <!-- les images des energies du pokemon actif du joueur iront ici -->
+                                        </HBox>
+                                    </children>
+                                </VBox>
+
+                                <!-- vbox pour la liste des attaques disponibles du pokemon actif du joueur -->
+                                <VBox alignment="TOP_CENTER" spacing="5" minWidth="160"> <!-- largeur minimale pour lisibilite des attaques -->
+                                    <padding>
+                                        <Insets left="5" right="5" />
+                                    </padding>
+                                    <children>
+                                        <Label text="Attaques disponibles:" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                                            <VBox.margin>
+                                                <Insets bottom="5" />
+                                            </VBox.margin>
+                                        </Label>
+                                        <VBox fx:id="attaquesDisponiblesVBoxJeu" spacing="5" alignment="TOP_LEFT">
+                                            <!-- les boutons d'attaque seront ajoutes ici par le code java -->
+                                        </VBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </center>
+    <bottom>
+        <!-- conteneur du bas pour la main du joueur actif, les compteurs de cartes et le bouton passer -->
+        <VBox fx:id="conteneurBas" alignment="CENTER" spacing="8" style="-fx-background-color: #e0e0e0; -fx-padding: 8px;">
+            <!-- conteneur pour les compteurs de cartes du joueur actif -->
+            <HBox alignment="CENTER" spacing="15" style="-fx-padding: 0 0 5 0;">
+                <children>
+                    <Label fx:id="nbCartesMainJoueurActifLabel" text="Main: -" style="-fx-font-size: 12px;"/>
+                    <Label fx:id="nbCartesPiocheJoueurActifLabel" text="Pioche: --" style="-fx-font-size: 12px;"/>
+                    <Label fx:id="nbCartesDefausseJoueurActifLabel" text="Défausse: --" style="-fx-font-size: 12px;"/>
+                    <Label fx:id="nbRecompensesJoueurActifLabel" text="Récompenses: -" style="-fx-font-size: 12px;"/>
+                </children>
+            </HBox>
+            <!-- scrollpane pour afficher la main et le banc du joueur actif (via vuejoueuractif.fxml) -->
+            <ScrollPane fx:id="scrollPanePourVueJoueur" fitToWidth="true" pannable="true" VBox.vgrow="NEVER" prefHeight="200" style="-fx-background-color: transparent; -fx-border-color: lightgray;">
+                <!-- vuejoueuractif (main, banc, etc.) sera ajoutee ici par le code java -->
+            </ScrollPane>
+            <Button fx:id="boutonPasser" text="Passer" style="-fx-font-size: 18px; -fx-font-weight: bold;" onAction="#actionPasser" prefWidth="150"/>
+        </VBox>
+    </bottom>
+</fx:root>
