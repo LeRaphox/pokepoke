@@ -9,14 +9,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<!--
-    fichier fxml principal pour la vue du jeu.
-    auteur: [votre nom ou pseudo]
-    date: [date de creation/modification]
-    description: definit la structure de l'interface utilisateur pour le jeu de cartes pokemon.
-                 organise en plusieurs zones : informations generales (top), zone de jeu principale (center)
-                 pour l'adversaire et le joueur actif, et la main/banc du joueur actif avec actions (bottom).
--->
 
 <fx:root type="javafx.scene.layout.BorderPane" xmlns:fx="http://javafx.com/fxml/1">
     <top>
